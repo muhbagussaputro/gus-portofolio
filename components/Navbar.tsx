@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
+import NavLink from './NavLink';
 
 const navItems = [
   { name: 'Home', href: '#home' },
@@ -17,6 +18,7 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
   const pathname = usePathname();
+  const navHeight = 90; // Approx height of navbar in pixels
 
   // Deteksi scroll untuk styling Navbar dan active section
   useEffect(() => {
@@ -33,12 +35,13 @@ export default function Navbar() {
         const sectionHeight = section.clientHeight;
         
         // If the section is in the viewport (with offset for navbar)
-        if (sectionTop <= 100 && sectionTop + sectionHeight > 100) {
+        // Increased offset to ensure better detection
+        if (sectionTop <= navHeight + 50 && sectionTop + sectionHeight > navHeight) {
           currentActiveSection = section.id;
         }
       });
 
-      // Only update state if changed
+      // Only update state if changed and not empty
       if (currentActiveSection && currentActiveSection !== activeSection) {
         setActiveSection(currentActiveSection);
       }
@@ -49,7 +52,7 @@ export default function Navbar() {
     handleScroll();
     
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [activeSection]);
+  }, [activeSection, navHeight]);
 
   // Variasi animasi untuk Navbar ketika scroll
   const navVariants = {
@@ -79,8 +82,14 @@ export default function Navbar() {
     const section = document.getElementById(sectionId);
     
     if (section) {
-      // Smooth scroll to section
-      section.scrollIntoView({ behavior: 'smooth' });
+      // Calculate position with offset for navbar
+      const offsetTop = section.getBoundingClientRect().top + window.pageYOffset - navHeight;
+      
+      // Smooth scroll to section with offset
+      window.scrollTo({
+        top: offsetTop,
+        behavior: 'smooth'
+      });
       
       // Update active section
       setActiveSection(sectionId);
@@ -106,36 +115,23 @@ export default function Navbar() {
     >
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <a href="#home" className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600">
+          <a 
+            href="#home" 
+            className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600"
+            onClick={(e) => scrollToSection(e, '#home')}
+          >
             Portfolio
           </a>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex space-x-8">
             {navItems.map((item) => (
-              <motion.div
+              <NavLink 
                 key={item.name}
-                whileHover={{ scale: 1.05 }}
-              >
-                <a
-                  href={item.href}
-                  onClick={(e) => scrollToSection(e, item.href)}
-                  className={`text-white hover:text-indigo-400 transition-colors font-bold relative py-1 ${
-                    isLinkActive(item.href) ? 'text-indigo-400' : ''
-                  }`}
-                >
-                  {item.name}
-                  {isLinkActive(item.href) && (
-                    <motion.div
-                      layoutId="activeSection"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-500 to-purple-600"
-                      initial={{ width: 0 }}
-                      animate={{ width: '100%' }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  )}
-                </a>
-              </motion.div>
+                item={item}
+                isActive={isLinkActive(item.href)}
+                onClick={(e) => scrollToSection(e, item.href)}
+              />
             ))}
           </div>
 

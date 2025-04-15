@@ -1,8 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Layout from '@/components/Layout';
-import ProfilePhoto from '@/components/ProfilePhoto';
+import Layout from '@/app/(home)/Layout';
+import ProfilePhoto from '@/app/(home)/ProfilePhoto';
 import ParallaxBackground from '@/components/ParallaxBackground';
 
 export default function AboutPage() {

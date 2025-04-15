@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Layout from '@/components/Layout';
+import Layout from '@/app/(home)/Layout';
 
 const projects = [
   {

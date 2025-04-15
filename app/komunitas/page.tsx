@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import Layout from '@/components/Layout';
+import Layout from '@/app/(home)/Layout';
 
 interface Message {
   id: number;

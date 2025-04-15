@@ -12,17 +12,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Professional Portfolio | Web Developer",
-  description: "Professional portfolio of a creative web developer focused on delivering exceptional user experiences.",
-  keywords: ["web development", "portfolio", "react", "next.js", "tailwind css"],
-  openGraph: {
-    title: "Professional Portfolio | Web Developer",
-    description: "Professional portfolio of a creative web developer focused on delivering exceptional user experiences.",
-    type: "website",
-    locale: "en_US",
-  },
-};
 
 export default function RootLayout({
   children,
@@ -30,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="id">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
