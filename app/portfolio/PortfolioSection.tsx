@@ -3,7 +3,8 @@
 import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import Link from 'next/link';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Github } from 'lucide-react';
+import { useProjects } from '@/hooks/useProjects';
 
 // Animation variants for section elements
 const sectionVariants = {
@@ -76,20 +77,52 @@ const AnimatedParagraph = ({ children, className }: { children: React.ReactNode;
   </motion.p>
 );
 
-// Project card component
-const ProjectCard = ({ title, description, tags, image }: { title: string; description: string; tags: string[]; image: string }) => (
+// Project card component (clickable demo/github)
+const ProjectCard = ({
+  title,
+  description,
+  tags,
+  imageUrl,
+  demoUrl,
+  githubUrl,
+}: {
+  title: string;
+  description: string;
+  tags: string[];
+  imageUrl?: string | null;
+  demoUrl?: string | null;
+  githubUrl?: string | null;
+}) => (
   <motion.div
     variants={elementVariants}
-    className="rounded-xl overflow-hidden bg-[#0a0a29]/40 border border-indigo-500/10 hover:border-indigo-500/30 transition-all duration-300"
+    className="rounded-xl overflow-hidden bg-[#0a0a29]/40 border border-indigo-500/10 hover:border-indigo-500/30 transition-all duration-300 group"
   >
-    <div className="h-48 bg-gradient-to-r from-indigo-500/20 to-purple-600/20 flex items-center justify-center">
-      <span className="text-white/50 text-sm">{image}</span>
+    {/* Thumbnail */}
+    <div className="relative h-48 w-full overflow-hidden">
+      {imageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={imageUrl} alt={title} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+      ) : (
+        <div className="h-full w-full bg-gradient-to-r from-indigo-500/20 to-purple-600/20 flex items-center justify-center">
+          <span className="text-white/50 text-sm">Project Preview</span>
+        </div>
+      )}
+      {demoUrl && (
+        <a
+          href={demoUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"
+          aria-label={`Open demo of ${title}`}
+        />
+      )}
     </div>
+    {/* Content */}
     <div className="p-6">
       <h3 className="text-xl font-semibold mb-2 text-white">{title}</h3>
-      <p className="text-white/60 mb-4 text-sm">{description}</p>
-      <div className="flex flex-wrap gap-2">
-        {tags.map((tag, index) => (
+      <p className="text-white/70 mb-4 text-sm leading-relaxed">{description}</p>
+      <div className="flex flex-wrap gap-2 mb-4">
+        {tags.slice(0, 6).map((tag, index) => (
           <span
             key={index}
             className="px-2 py-1 text-xs rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20"
@@ -98,11 +131,34 @@ const ProjectCard = ({ title, description, tags, image }: { title: string; descr
           </span>
         ))}
       </div>
+      <div className="flex items-center gap-3">
+        {demoUrl && (
+          <a
+            href={demoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-indigo-500/40 text-white hover:bg-indigo-500/10 transition"
+          >
+            <ExternalLink size={16} /> Demo
+          </a>
+        )}
+        {githubUrl && (
+          <a
+            href={githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-indigo-500/40 text-white/80 hover:bg-indigo-500/10 transition"
+          >
+            <Github size={16} /> GitHub
+          </a>
+        )}
+      </div>
     </div>
   </motion.div>
 );
 
 export default function PortfolioSection() {
+  const { projects, loading } = useProjects({ featured: true, limit: 6 });
   return (
     <Section id="portfolio" className="bg-transparent">
       <AnimatedHeading className="text-center">
@@ -115,33 +171,27 @@ export default function PortfolioSection() {
       </AnimatedParagraph>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <ProjectCard 
-          title="E-Commerce Platform"
-          description="Solusi e-commerce modern dengan pemrosesan pembayaran terintegrasi dan manajemen inventaris."
-          tags={["Next.js", "Stripe", "MongoDB", "Tailwind CSS"]}
-          image="E-Commerce Preview"
-        />
-        
-        <ProjectCard 
-          title="Social Media Dashboard"
-          description="Dashboard analitik untuk melacak metrik engagement di berbagai platform media sosial."
-          tags={["React", "D3.js", "Express", "Material UI"]}
-          image="Dashboard Preview"
-        />
-        
-        <ProjectCard 
-          title="Real-time Chat Application"
-          description="Platform perpesanan aman dengan enkripsi end-to-end dan kemampuan berbagi file."
-          tags={["Socket.io", "Node.js", "Firebase", "React"]}
-          image="Chat App Preview"
-        />
+        {loading && (
+          <div className="col-span-3 text-center text-white/60">Loading projects...</div>
+        )}
+        {!loading && projects.map((p: any) => (
+          <ProjectCard
+            key={p.slug}
+            title={p.title}
+            description={p.short_description || ''}
+            tags={(p.technologies || []).map((t: any) => t?.technology?.name ?? t?.name).filter(Boolean)}
+            imageUrl={p.thumbnail_url}
+            demoUrl={p.demo_url}
+            githubUrl={p.github_url}
+          />
+        ))}
       </div>
       
       <motion.div
         variants={elementVariants}
         className="mt-16 text-center"
       >
-        <Link href="#" className="px-6 py-3 rounded-lg border border-indigo-500/50
+        <Link href="/portfolio" className="px-6 py-3 rounded-lg border border-indigo-500/50
           text-white font-medium inline-flex items-center space-x-2 
           hover:bg-indigo-500/10 transition-all duration-300"
         >

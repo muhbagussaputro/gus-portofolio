@@ -3,6 +3,8 @@
 import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import Image from 'next/image';
+import { useCommunityStats } from '@/hooks/useCommunityStats';
+import { useTestimonials } from '@/hooks/useTestimonials';
 
 // Animation variants for section elements
 const sectionVariants = {
@@ -108,6 +110,18 @@ const CommunityStat = ({ count, label }: { count: string; label: string }) => (
 );
 
 export default function CommunitySection() {
+  const { stats, loading: statsLoading, error: statsError } = useCommunityStats();
+  const { testimonials, loading: testimonialsLoading, error: testimonialsError } = useTestimonials({ featured: true, limit: 6 });
+
+  // Function to get initials from name
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase();
+  };
+
   return (
     <Section id="community" className="bg-transparent">
       <AnimatedHeading className="text-center">
@@ -125,35 +139,86 @@ export default function CommunitySection() {
         variants={elementVariants}
         className="grid grid-cols-2 md:grid-cols-4 gap-4 my-12 border-y border-indigo-500/10 py-12"
       >
-        <CommunityStat count="2,500+" label="Koneksi LinkedIn" />
-        <CommunityStat count="15+" label="Proyek Open Source" />
-        <CommunityStat count="20+" label="Klien Puas" />
-        <CommunityStat count="5+" label="Tahun Pengalaman" />
+        {statsLoading ? (
+          // Loading skeleton
+          Array.from({ length: 4 }).map((_, index) => (
+            <motion.div
+              key={index}
+              variants={elementVariants}
+              className="text-center p-4 animate-pulse"
+            >
+              <div className="h-12 bg-indigo-500/20 rounded mb-2"></div>
+              <div className="h-4 bg-indigo-500/10 rounded"></div>
+            </motion.div>
+          ))
+        ) : statsError ? (
+          <motion.div
+            variants={elementVariants}
+            className="col-span-full text-center text-red-400 p-4"
+          >
+            Error loading community stats
+          </motion.div>
+        ) : (
+          stats?.map((stat) => (
+            <CommunityStat 
+              key={stat.id}
+              count={stat.value} 
+              label={stat.label} 
+            />
+          ))
+        )}
       </motion.div>
       
       {/* Testimonials */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <TestimonialCard 
-          name="Ahmad Fajar"
-          role="CTO, TechStars Indonesia"
-          text="Bagus adalah pengembang yang luar biasa dengan pemahaman mendalam tentang React dan Next.js. Kemampuannya untuk memecahkan masalah kompleks dan menghasilkan solusi elegan sangat mengesankan."
-          avatarPlaceholder="AF"
-        />
-        
-        <TestimonialCard 
-          name="Siti Amalia"
-          role="Product Manager, InnovateID"
-          text="Bekerja dengan Bagus selalu menjadi pengalaman yang menyenangkan. Dia tidak hanya memiliki keterampilan teknis yang hebat, tetapi juga pemahaman bisnis yang membantu proyek kami mencapai tujuannya."
-          avatarPlaceholder="SA"
-        />
-        
-        <TestimonialCard 
-          name="Budi Santoso"
-          role="Startup Founder, EdTech Nusantara"
-          text="Bagus membantu kami mengubah visi menjadi realitas. Kode berkualitasnya dan komitmennya terhadap batas waktu membuat dia menjadi aset berharga untuk tim pengembangan manapun."
-          avatarPlaceholder="BS"
-        />
+        {testimonialsLoading ? (
+          // Loading skeleton
+          Array.from({ length: 3 }).map((_, index) => (
+            <motion.div
+              key={index}
+              variants={elementVariants}
+              className="rounded-xl bg-[#0a0a29]/40 border border-indigo-500/10 p-6 animate-pulse"
+            >
+              <div className="flex items-center mb-4">
+                <div className="rounded-full w-12 h-12 bg-indigo-500/20 mr-4"></div>
+                <div className="flex-1">
+                  <div className="h-4 bg-indigo-500/20 rounded mb-2"></div>
+                  <div className="h-3 bg-indigo-500/10 rounded w-2/3"></div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="h-3 bg-indigo-500/10 rounded"></div>
+                <div className="h-3 bg-indigo-500/10 rounded"></div>
+                <div className="h-3 bg-indigo-500/10 rounded w-3/4"></div>
+              </div>
+            </motion.div>
+          ))
+        ) : testimonialsError ? (
+          <motion.div
+            variants={elementVariants}
+            className="col-span-full text-center text-red-400 p-6"
+          >
+            Error loading testimonials
+          </motion.div>
+        ) : testimonials && testimonials.length > 0 ? (
+          testimonials.map((testimonial) => (
+             <TestimonialCard 
+               key={testimonial.id}
+               name={testimonial.name}
+               role={testimonial.role || 'Client'}
+               text={testimonial.content}
+               avatarPlaceholder={getInitials(testimonial.name)}
+             />
+           ))
+        ) : (
+          <motion.div
+            variants={elementVariants}
+            className="col-span-full text-center text-white/50 p-6"
+          >
+            No testimonials available
+          </motion.div>
+        )}
       </div>
     </Section>
   );
-} 
+}

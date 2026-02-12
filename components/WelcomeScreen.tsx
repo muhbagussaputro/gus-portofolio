@@ -7,8 +7,8 @@ import TypewriterComponent from 'typewriter-effect';
 import dynamic from 'next/dynamic';
 import loadingAnimation from '@/public/animations/loading-animation.json';
 
-// Dynamically import Lottie with ssr: false option
-const Lottie = dynamic(() => import('react-lottie'), {
+// Dynamically import Lottie dengan lottie-react yang modern
+const Lottie = dynamic(() => import('lottie-react'), {
   ssr: false,
 });
 
@@ -62,15 +62,8 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
   const [showLoadingText, setShowLoadingText] = useState(false);
   const [showCodeAnimation, setShowCodeAnimation] = useState(false);
 
-  // Lottie animation configuration
-  const defaultOptions = {
-    loop: true,
-    autoplay: true,
-    animationData: loadingAnimation,
-    rendererSettings: {
-      preserveAspectRatio: 'xMidYMid slice',
-    },
-  };
+  // Animation data untuk Lottie
+  const animationData = loadingAnimation;
 
   // Effect to start loading process and show code animation
   useEffect(() => {

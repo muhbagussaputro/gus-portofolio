@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react';
 import ClientLayout from './ClientLayout';
+import { ToastProvider } from '@/components/Toast';
 
 interface LayoutProps {
   children: ReactNode;
@@ -9,8 +10,10 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   return (
-    <ClientLayout>
-      {children}
-    </ClientLayout>
+    <ToastProvider>
+      <ClientLayout>
+        {children}
+      </ClientLayout>
+    </ToastProvider>
   );
-} 
+}

@@ -1,0 +1,37 @@
+# Copy this file to .env.local and fill in your actual values
+
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+
+# Cloudflare R2 Configuration
+CLOUDFLARE_R2_ACCOUNT_ID=your_r2_account_id_here
+CLOUDFLARE_R2_ACCESS_KEY_ID=a1b2c3d4e5f6789012345678901234ab
+CLOUDFLARE_R2_SECRET_ACCESS_KEY=1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+CLOUDFLARE_R2_BUCKET_NAME=layananmurah
+CLOUDFLARE_R2_PUBLIC_URL=https://storage.layananmurah.my.id
+
+# PENTING: 
+# - ACCESS_KEY_ID harus tepat 32 karakter
+# - SECRET_ACCESS_KEY harus tepat 64 karakter
+# - BUCKET_NAME hanya nama bucket (tanpa URL)
+# - PUBLIC_URL adalah custom domain atau r2.dev URL
+# - Jika credential length salah, generate ulang API token di Cloudflare
+
+# Optional: Email Configuration (for contact form)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email@gmail.com
+SMTP_PASSWORD=your_app_password
+
+# Optional: Analytics
+GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
+
+# App Configuration
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_NAME="Bagus Portfolio"
+
+# Admin Basic Auth (required by middleware for /admin and protected /api routes)
+ADMIN_BASIC_AUTH_USER=admin
+ADMIN_BASIC_AUTH_PASSWORD=change_this_password

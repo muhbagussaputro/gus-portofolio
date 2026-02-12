@@ -7,6 +7,7 @@ import { Code, Zap, Database, Server, Layers, Monitor, Send, ExternalLink, Chevr
 import TypewriterComponent from 'typewriter-effect';
 import ProfilePhoto from '@/app/(home)/ProfilePhoto';
 import Link from 'next/link';
+import { useProfile } from '@/hooks/useAbout';
 
 // Dynamically import Lottie dengan lottie-react yang modern
 const Lottie = dynamic(() => import('lottie-react'), {
@@ -132,8 +133,24 @@ const TechStack = () => {
   );
 };
 
+// Interface untuk Lottie animation data
+interface LottieAnimationData {
+  v: string;
+  fr: number;
+  ip: number;
+  op: number;
+  w: number;
+  h: number;
+  nm: string;
+  ddd: number;
+  assets: unknown[];
+  layers: unknown[];
+  markers?: unknown[];
+}
+
 export default function HeroSection() {
-  const [lottieData, setLottieData] = useState<any>(null);
+  const { profile } = useProfile();
+  const [lottieData, setLottieData] = useState<LottieAnimationData | null>(null);
   const [lottieError, setLottieError] = useState(false);
   const [glitchActive, setGlitchActive] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -147,7 +164,7 @@ export default function HeroSection() {
   useEffect(() => {
     import('@/public/animations/profile-animation.json')
       .then((data) => {
-        setLottieData(data.default);
+        setLottieData(data.default as LottieAnimationData);
       })
       .catch((error) => {
         console.error("Failed to load animation:", error);
@@ -462,10 +479,10 @@ export default function HeroSection() {
             </motion.div>
             
             <AnimatedHeading>
-              <span className="text-white">MUH BAGUS</span> 
+              <span className="text-white">{profile?.full_name?.split(' ')[0] || 'MUH BAGUS'}</span> 
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600">
-                SAPUTRO
+                {profile?.full_name?.split(' ').slice(1).join(' ') || 'SAPUTRO'}
               </span>
             </AnimatedHeading>
             
@@ -475,7 +492,7 @@ export default function HeroSection() {
             >
               <TypewriterComponent
                 options={{
-                  strings: [
+                  strings: profile?.hero_strings && profile.hero_strings.length > 0 ? profile.hero_strings : [
                     'Full Stack Developer & Mobile Developer',
                     'Android Development with Kotlin and Java',
                     'Web Development with React and Next.js',
@@ -514,9 +531,9 @@ export default function HeroSection() {
               variants={elementVariants}
               className="flex space-x-4"
             >
-              <SocialLink icon={Github} href="https://github.com/BagusCPaste/" />
-              <SocialLink icon={Linkedin} href="https://linkedin.com/in/gusaja" />
-              <SocialLink icon={Mail} href="mailto:muhbagussaputro.id@gmail.com" />
+              <SocialLink icon={Github} href={profile?.github_url || 'https://github.com/BagusCPaste/'} />
+              <SocialLink icon={Linkedin} href={profile?.linkedin_url || 'https://linkedin.com/in/gusaja'} />
+              <SocialLink icon={Mail} href={profile?.email ? `mailto:${profile.email}` : 'mailto:muhbagussaputro.id@gmail.com'} />
             </motion.div>
           </div>
           

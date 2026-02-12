@@ -2,6 +2,7 @@
 
 import { ReactNode, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { ToastProvider } from '@/components/Toast';
 
 interface ClientLayoutProps {
   children: ReactNode;
@@ -21,16 +22,18 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
   }, []);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: loaded ? 1 : 0 }}
-      transition={{ duration: 0.5, ease: 'easeInOut' }}
-      className="min-h-screen flex flex-col bg-[#030014] overflow-hidden"
-    >
-      {/* Main content */}
-      <main className="flex-grow">
-        {children}
-      </main>
-    </motion.div>
+    <ToastProvider>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: loaded ? 1 : 0 }}
+        transition={{ duration: 0.5, ease: 'easeInOut' }}
+        className="min-h-screen flex flex-col bg-[#030014] overflow-hidden"
+      >
+        {/* Main content */}
+        <main className="flex-grow">
+          {children}
+        </main>
+      </motion.div>
+    </ToastProvider>
   );
-} 
+}

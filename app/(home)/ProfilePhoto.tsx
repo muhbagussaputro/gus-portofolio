@@ -5,9 +5,10 @@ import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import profileAnimation from '@/public/animations/profile-animation.json';
+import { useHomepageAssets } from '@/hooks/useHomepageAssets';
 
-// Import Lottie secara dinamis untuk menghindari error SSR
-const Lottie = dynamic(() => import('react-lottie'), {
+// Import Lottie secara dinamis untuk menghindari error SSR dengan lottie-react yang modern
+const Lottie = dynamic(() => import('lottie-react'), {
   ssr: false,
 });
 
@@ -17,33 +18,58 @@ interface ProfilePhotoProps {
   withAnimation?: boolean;
 }
 
+interface LottieAnimationData {
+  v: string;
+  fr: number;
+  ip: number;
+  op: number;
+  w: number;
+  h: number;
+  nm: string;
+  ddd: number;
+  assets: unknown[];
+  layers: unknown[];
+  markers?: unknown[];
+}
+
 const ProfilePhoto: React.FC<ProfilePhotoProps> = ({
   imageUrl = '/images/profil.jpg',
   size = 250,
   withAnimation = true,
 }) => {
-  const [animationData, setAnimationData] = useState<any>(null);
-  const [imageError, setImageError] = useState(false);
+  const [imageError, setImageError] = useState<boolean>(false);
+  const [animationData, setAnimationData] = useState<LottieAnimationData | null>(null);
+  const { getActiveAssetByType, isLoading } = useHomepageAssets();
 
+  // Get dynamic assets from database
+  const profilePhotoAsset = getActiveAssetByType('profile_photo');
+  const animationAsset = getActiveAssetByType('animation');
+
+  // Determine which image to use - database first, then props, then fallback
+  const finalImageUrl = profilePhotoAsset?.file_url || imageUrl;
+
+  // Load animation data (database first, then fallback)
   useEffect(() => {
-    // Load animation data dinamis
-    import('@/public/animations/profile-animation.json')
-      .then((data) => {
-        setAnimationData(data.default);
-      })
-      .catch((error) => {
-        console.error("Failed to load animation:", error);
-      });
-  }, []);
+    const loadAnimation = async () => {
+      if (animationAsset?.file_url) {
+        try {
+          // Try to load animation from database URL
+          const response = await fetch(animationAsset.file_url);
+          const data = await response.json();
+          setAnimationData(data as LottieAnimationData);
+        } catch (error) {
+          console.error('Failed to load animation from database, using fallback:', error);
+          // Use fallback animation
+          setAnimationData(profileAnimation as LottieAnimationData);
+        }
+      } else {
+        // Use fallback animation
+        setAnimationData(profileAnimation as LottieAnimationData);
+      }
+    };
 
-  const defaultOptions = {
-    loop: true,
-    autoplay: true,
-    animationData: animationData,
-    rendererSettings: {
-      preserveAspectRatio: 'xMidYMid slice',
-    },
-  };
+    loadAnimation();
+  }, [animationAsset]);
 
   const photoSize = typeof size === 'number' ? size : parseInt(size as string, 10);
   const framePadding = 30; // Padding untuk frame animasi
@@ -53,7 +79,12 @@ const ProfilePhoto: React.FC<ProfilePhotoProps> = ({
     <div className="relative" style={{ width: frameSize, height: frameSize }}>
       {withAnimation && animationData && (
         <div className="absolute inset-0 z-0">
-          <Lottie options={defaultOptions} height={frameSize} width={frameSize} />
+          <Lottie 
+            animationData={animationData}
+            loop={true}
+            autoplay={true}
+            style={{ height: frameSize, width: frameSize }}
+          />
         </div>
       )}
       
@@ -76,8 +107,8 @@ const ProfilePhoto: React.FC<ProfilePhotoProps> = ({
         <div className="absolute inset-[5px] rounded-full overflow-hidden bg-[#030014]">
           {!imageError ? (
             <Image
-              src={imageUrl}
-              alt="Foto Profil"
+              src={finalImageUrl}
+              alt={profilePhotoAsset?.title || "Foto Profil"}
               width={photoSize}
               height={photoSize}
               className="object-cover"

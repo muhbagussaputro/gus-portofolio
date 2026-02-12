@@ -4,6 +4,7 @@ import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Code, Zap, Database, Server, Layers, Monitor, Smartphone, GraduationCap, Calendar } from 'lucide-react';
 import SkillCards from '@/components/SkillCards';
+import { useAbout, useProfile } from '@/hooks/useAbout';
 import Image from 'next/image';
 
 // Animation variants for section elements
@@ -124,6 +125,8 @@ const SkillCard = ({ icon: Icon, title, description }: { icon: any; title: strin
 );
 
 export default function AboutSection() {
+  const { data } = useAbout();
+  const { profile } = useProfile();
   return (
     <Section id="about" className="bg-transparent text-white">
       <div className="space-y-16">
@@ -137,15 +140,7 @@ export default function AboutSection() {
             </AnimatedHeading>
             
             <AnimatedParagraph>
-              Full Stack Developer & Mobile Developer dengan pengalaman lebih dari 3 tahun dalam merancang, mengembangkan, dan mengelola aplikasi berbasis web dan mobile.
-            </AnimatedParagraph>
-            
-            <AnimatedParagraph>
-              Terbiasa bekerja dari sisi frontend hingga backend dengan pendekatan yang efisien, terstruktur, dan berorientasi pada kebutuhan pengguna. Menguasai berbagai bahasa dan teknologi pemrograman seperti Kotlin, Java, PHP, dan JavaScript.
-            </AnimatedParagraph>
-            
-            <AnimatedParagraph>
-              Aktif mendalami teknologi baru seperti AI Agent dan Blockchain untuk menciptakan solusi digital yang inovatif, scalable, dan siap menghadapi tantangan masa depan.
+              {profile?.summary || 'Full Stack Developer & Mobile Developer dengan pengalaman membangun aplikasi web dan mobile.'}
             </AnimatedParagraph>
           </div>
           
@@ -155,9 +150,9 @@ export default function AboutSection() {
           >
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-600/20 blur-xl"></div>
             <div className="relative overflow-hidden rounded-2xl border-2 border-indigo-500/20 shadow-xl shadow-indigo-500/10">
-              <Image
+               <Image
                 src="/images/profil.jpg"
-                alt="Muh Bagus Saputro"
+                alt={profile?.full_name || 'Profile'}
                 width={500}
                 height={500}
                 className="object-cover w-full h-full"
@@ -180,29 +175,16 @@ export default function AboutSection() {
           </motion.div>
           
           <div className="space-y-6">
-            <TimelineItem 
-              icon={GraduationCap}
-              title="Universitas Dian Nuswantoro"
-              subtitle="Teknik Informatika - IPK 3.76"
-              period="September 2021 - Februari 2025"
-              description="Fokus pada pengembangan aplikasi mobile dan web, machine learning, dan data science."
-            />
-            
-            <TimelineItem 
-              icon={GraduationCap}
-              title="SMK Tunas Harapan Pati"
-              subtitle="Computer and Networking Engineering"
-              period="Juli 2018 - Juni 2021"
-              description="Mempelajari dasar-dasar jaringan komputer dan pengembangan aplikasi Android."
-            />
-            
-            <TimelineItem 
-              icon={Smartphone}
-              title="Bangkit Academy led by Google, Tokopedia, Gojek, & Traveloka"
-              subtitle="Mobile Development Cohort (Kotlin)"
-              period="Februari 2024 - Juli 2024"
-              description="Mengembangkan aplikasi ISALAT (Instant Sign Language Translator) yang menerjemahkan bahasa isyarat menggunakan TensorFlow Lite."
-            />
+            {data?.education?.map((edu) => (
+              <TimelineItem
+                key={edu.id}
+                icon={GraduationCap}
+                title={edu.institution}
+                subtitle={[edu.degree, edu.field_of_study].filter(Boolean).join(' - ')}
+                period={`${new Date(edu.start_date).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })} - ${edu.end_date ? new Date(edu.end_date).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) : 'Present'}`}
+                description={edu.description || ''}
+              />
+            ))}
           </div>
         </div>
         
